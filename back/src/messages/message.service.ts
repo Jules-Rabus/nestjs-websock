@@ -71,11 +71,12 @@ export class MessageService {
         }),
       );
     }
+
     return this.prisma.message.create({
       data: {
         content: data.content,
         chat: { connect: { id: data.chatId } },
-        author: { connect: { id: userId ?? 1 } },
+        author: { connect: { id: userId } },
         filePath: key,
       },
       include: {

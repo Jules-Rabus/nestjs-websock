@@ -25,16 +25,15 @@ export class ChatService {
 
   async findOne(id: number): Promise<
     Chat & {
-      participants: { id: number; email: string }[];
+      participants: { id: number; firstName: string; lastName: string }[];
       messages: { id: number; content: string; createdAt: Date }[];
     }
   > {
     const chat = await this.prisma.chat.findUnique({
       where: { id },
       include: {
-        participants: { select: { id: true, email: true } },
+        participants: { select: { id: true, firstName: true, lastName: true } },
         messages: {
-          select: { id: true, content: true, createdAt: true },
           orderBy: { createdAt: 'asc' },
         },
       },

@@ -12,7 +12,7 @@ interface Register {
 }
 
 export interface Payload {
-  sub: number;
+  id: number;
   email: string;
   firstName: string;
   lastName: string;
@@ -38,7 +38,7 @@ export class AuthService {
     }
 
     const payload: Payload = {
-      sub: user.id,
+      id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
