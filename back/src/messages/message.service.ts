@@ -3,11 +3,14 @@ import { PrismaService } from 'src/prisma.service';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CreateMessageDto } from './dto/create-message-dto';
 import { UpdateMessageDto } from './dto/update-message-dto';
-import { Message, Prisma } from '@prisma/client';
+import { Prisma, Message } from '@prisma/client';
+import { Subject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Injectable()
 export class MessageService {
   private s3: S3Client;
+  private messageSubject: Subject<Message>;
 
   constructor(private readonly prisma: PrismaService) {
     this.s3 = new S3Client({
@@ -19,6 +22,13 @@ export class MessageService {
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
       },
     });
+    this.messageSubject = new Subject<Message>();
+  }
+
+  streamMessages(chatId: number): Observable<Message> {
+    return this.messageSubject
+      .asObservable()
+      .pipe(filter((msg) => msg.chatId === chatId));
   }
 
   async findAll(): Promise<
@@ -72,7 +82,7 @@ export class MessageService {
       );
     }
 
-    return this.prisma.message.create({
+    const created = await this.prisma.message.create({
       data: {
         content: data.content,
         chat: { connect: { id: data.chatId } },
@@ -83,6 +93,8 @@ export class MessageService {
         author: { select: { id: true, email: true } },
       },
     });
+    this.messageSubject.next(created);
+    return created;
   }
 
   async update(

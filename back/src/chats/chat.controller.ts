@@ -6,13 +6,16 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateChatDto } from './dto/create-chat-dto';
 import { UpdateChatDto } from './dto/update-chat-dto';
 import { ChatService } from './chat.service';
+import { AuthGuard } from '../auth/auth.guard';
 
 @ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('chats')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}

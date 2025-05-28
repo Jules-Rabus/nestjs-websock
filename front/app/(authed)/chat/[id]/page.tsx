@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { findOneChat, Chat as ChatType } from '@/app/actions/chat';
+import { findOneChat, Chat as ChatType, getEventSourceChat } from '@/app/actions/chat';
 import { addMessage, Message as MessageType } from '@/app/actions/message';
 import { User } from '@/app/actions/user';
 
@@ -57,20 +57,28 @@ export default function ChatPage() {
         });
     }, [chatId]);
 
+    useEffect(() => {
+        const eventSource = getEventSourceChat(chatId);
+        eventSource.onmessage = event => {
+            const msg: MessageType = JSON.parse(event.data);
+            setMessages(prev => [...prev, msg]);
+        };
+        return () => {
+            eventSource.close();
+        };
+    }, [chatId]);
+
     const handleSend = async () => {
         if (!input.trim() || !chat) return;
         try {
             const res = await addMessage({ content: input, chatId, file: undefined });
-            setMessages(prev => [...prev, res.data]);
             setInput('');
         } catch (err) {
             console.error(err);
         }
     };
 
-    if (!chat) {
-        return <div className="p-4">Loading...</div>;
-    }
+    if (!chat) return <div className="p-4">Loading…</div>;
 
     return (
         <div className="flex flex-col h-full">
@@ -79,16 +87,14 @@ export default function ChatPage() {
                 {messages.map(msg => {
                     const isOwn = msg.authorId === currentUser.id;
                     const author = chat.participants.find(p => p.id === msg.authorId);
-                    const authorName = isOwn ? 'Moi'
+                    const authorName = isOwn
+                        ? 'Moi'
                         : author
                             ? `${author.firstName} ${author.lastName}`
                             : 'Unknown';
 
                     return (
-                        <div
-                            key={msg.id}
-                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                        >
+                        <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                             <div
                                 className={`${
                                     isOwn ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'

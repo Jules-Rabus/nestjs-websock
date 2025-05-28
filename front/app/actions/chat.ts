@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { api } from "@/lib/api";
+import { api, getToken } from "@/lib/api";
 import { User } from "./user";
 import { Message } from "postcss";
 
@@ -43,4 +43,10 @@ export const handleUpdateChat = async (
     data: UpdateChat
 ): Promise<AxiosResponse<Chat>> => {
     return api.patch(`chats/${id}`, data);
+};
+
+export const getEventSourceChat = (chatId: number): EventSource => {
+    const token = getToken();
+    const url = `${api.defaults.baseURL}/messages/events/${chatId}?token=${token}`;
+    return new EventSource(url);
 };

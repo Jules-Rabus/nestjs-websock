@@ -7,11 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.enableCors({
-    origin: ['http://localhost:3001'],
+    origin: ['http://localhost:3000'],
   });
   const config = new DocumentBuilder()
-    .setTitle('TicketGPT')
-    .setDescription('The best ticketing app')
+    .setTitle('Chat App API')
+    .setDescription('The Chat App API description')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

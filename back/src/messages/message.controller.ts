@@ -9,7 +9,8 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
-  Req,
+  Sse,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
@@ -17,15 +18,19 @@ import { CreateMessageDto } from './dto/create-message-dto';
 import { UpdateMessageDto } from './dto/update-message-dto';
 import { MessageService } from './message.service';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { GetUser } from '../decorators/getUser';
+import { GetUser } from 'src/decorators/getUser';
 import { User } from '@prisma/client';
+import { map, Observable } from 'rxjs';
+import { PrismaService } from 'src/prisma.service';
 
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 @Controller('messages')
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
-
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly prisma: PrismaService,
+  ) {}
   @Get()
   findAll() {
     return this.messageService.findAll();
@@ -61,5 +66,28 @@ export class MessageController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.messageService.remove(+id);
+  }
+
+  @Sse('events/:chatId')
+  async events(
+    @GetUser() user: User,
+    @Param('chatId') chatIdParam: string,
+  ): Promise<Observable<{ data: any }>> {
+    const chatId = Number(chatIdParam);
+    const chat: { id: number } | null = await this.prisma.chat.findFirst({
+      where: {
+        id: chatId,
+        participants: { some: { id: user.id } },
+      },
+    });
+    if (!chat) {
+      throw new NotFoundException(
+        `Chat ${chatId} introuvable ou vous n'en êtes pas participant`,
+      );
+    }
+
+    return this.messageService
+      .streamMessages(chatId)
+      .pipe(map((message) => ({ data: message })));
   }
 }
