@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { Chat, Prisma } from '@prisma/client';
+import { User, Chat, Prisma } from '@prisma/client';
 import { CreateChatDto } from './dto/create-chat-dto';
 import { UpdateChatDto } from './dto/update-chat-dto';
 
@@ -8,13 +8,16 @@ import { UpdateChatDto } from './dto/update-chat-dto';
 export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<
+  async findAll(user: User): Promise<
     (Chat & {
       participants: { id: number; email: string }[];
       _count: { messages: number };
     })[]
   > {
     return this.prisma.chat.findMany({
+      where: {
+        participants: { some: { id: user.id } },
+      },
       include: {
         participants: { select: { id: true, email: true } },
         _count: { select: { messages: true } },

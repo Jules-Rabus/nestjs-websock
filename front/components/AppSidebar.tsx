@@ -1,7 +1,5 @@
 "use client";
 
-import { Home, Ticket } from "lucide-react";
-
 import {
   Sidebar,
   SidebarContent,
@@ -14,25 +12,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { authContext } from "@/providers/AuthProvider";
-import { useContext, useMemo } from "react";
+import {useContext, useEffect, useMemo, useState} from "react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-
-// Menu items.
-const items = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "Tickets",
-    url: "/tickets",
-    icon: Ticket,
-  },
-];
+import { Chat as ChatType} from "@/app/actions/chat";
+import { findAllChats } from "@/app/actions/chat";
 
 export function AppSidebar() {
   const { user } = useContext(authContext);
+  const [chats, setChats] = useState<ChatType[]>([]);
+
+  useEffect(async () => {
+    const chats = await findAllChats();
+    setChats(chats.data);
+    }, []);
 
   const userAbreviation = useMemo(
     () => (user ? `${user.firstName[0]}${user.lastName[0]}` : ""),
@@ -43,15 +35,14 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Vos conversations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {chats.map((chat) => (
+                <SidebarMenuItem key={chat.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                    <a href={`/chat/${chat.id}`} className="flex items-center gap-2">
+                      <span>{chat.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

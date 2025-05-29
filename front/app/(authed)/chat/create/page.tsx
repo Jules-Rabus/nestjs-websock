@@ -33,7 +33,7 @@ export default function CreateChatPage() {
         if (!title.trim() || participants.length === 0) return;
         try {
             const res = await addChat({ title, participants });
-           //router.push(`/chats/${res.data.id}`);
+           router.push(`/chat/${res.data.id}`);
         } catch (err) {
             console.error(err);
         }

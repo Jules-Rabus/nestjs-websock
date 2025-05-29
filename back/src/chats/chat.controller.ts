@@ -13,6 +13,8 @@ import { CreateChatDto } from './dto/create-chat-dto';
 import { UpdateChatDto } from './dto/update-chat-dto';
 import { ChatService } from './chat.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { GetUser } from '../decorators/getUser';
+import { User } from '@prisma/client';
 
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -21,8 +23,8 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get()
-  findAll() {
-    return this.chatService.findAll();
+  findAll(@GetUser() user: User) {
+    return this.chatService.findAll(user);
   }
 
   @Get(':id')
