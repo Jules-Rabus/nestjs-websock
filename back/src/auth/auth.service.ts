@@ -16,6 +16,7 @@ export interface Payload {
   email: string;
   firstName: string;
   lastName: string;
+  color: string;
 }
 
 @Injectable()
@@ -42,6 +43,7 @@ export class AuthService {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      color: user.color,
     };
 
     return {

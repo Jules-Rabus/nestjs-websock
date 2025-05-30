@@ -31,6 +31,8 @@ export default function ChatPage() {
   const { user } = useContext(authContext);
 
   useEffect(() => {
+    if (!user) return;
+
     findOneChat(chatId).then((res) => {
       setChat(res.data);
       const initialMessages = res.data.messages.map((m) => ({
@@ -41,7 +43,7 @@ export default function ChatPage() {
 
       initialMessages.forEach((message) => {
         if (
-          message.author.id !== user.id &&
+          message.authorId !== user.id &&
           !message.readBy.some((u) => u.id === user.id)
         ) {
           markRead(message.id);
@@ -60,7 +62,7 @@ export default function ChatPage() {
           return prev.map((m) => (m.id === msg.id ? { ...m, ...msg } : m));
         } else {
           if (
-            msg.author.id !== user.id &&
+            msg.authorId !== user.id &&
             !msg.readBy.some((u) => u.id === user.id)
           ) {
             markRead(msg.id);
@@ -117,8 +119,8 @@ export default function ChatPage() {
       <ParticipantsBar participants={chat.participants} />
       <MessagesList
         messages={messages}
-        currentUserId={user.id}
-        participantsCount={chat.participants.length}
+        currentUser={user}
+        participants={chat.participants}
         editText={editText}
         setEditText={setEditText}
         onStartEdit={startEdit}

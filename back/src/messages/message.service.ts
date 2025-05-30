@@ -44,7 +44,7 @@ export class MessageService {
         },
       },
       include: {
-        readBy: { select: { id: true, firstName: true, lastName: true } },
+        readBy: { select: { id: true } },
       },
     });
 
@@ -52,34 +52,24 @@ export class MessageService {
     return updated;
   }
 
-  async findAll(): Promise<
-    (Message & {
-      author: { id: number; email: string };
-      chat: { id: number; title: string };
-    })[]
-  > {
+  async findAll(): Promise<Message[]> {
     return this.prisma.message.findMany({
       include: {
-        author: { select: { id: true, email: true } },
+        author: { select: { id: true } },
         chat: { select: { id: true, title: true } },
-        readBy: { select: { id: true, firstName: true, lastName: true } },
+        readBy: { select: { id: true } },
       },
       orderBy: { createdAt: 'asc' },
     });
   }
 
-  async findOne(id: number): Promise<
-    Message & {
-      author: { id: number; email: string };
-      chat: { id: number; title: string };
-    }
-  > {
+  async findOne(id: number): Promise<Message> {
     const msg = await this.prisma.message.findUnique({
       where: { id },
       include: {
-        author: { select: { id: true, email: true } },
+        author: { select: { id: true } },
         chat: { select: { id: true, title: true } },
-        readBy: { select: { id: true, firstName: true, lastName: true } },
+        readBy: { select: { id: true } },
       },
     });
     if (!msg) {
@@ -114,9 +104,11 @@ export class MessageService {
       },
       include: {
         author: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+          select: {
+            id: true,
+          },
         },
-        readBy: { select: { id: true, firstName: true, lastName: true } },
+        readBy: { select: { id: true } },
       },
     });
     this.messageSubject.next(created);
@@ -150,8 +142,10 @@ export class MessageService {
       where: { id },
       data: updateData,
       include: {
-        author: { select: { id: true, firstName: true, lastName: true } },
-        readBy: { select: { id: true, firstName: true, lastName: true } },
+        author: {
+          select: { id: true },
+        },
+        readBy: { select: { id: true } },
       },
     });
     this.messageSubject.next(updated);

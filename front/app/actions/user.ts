@@ -7,6 +7,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: 'USER' | 'ADMIN';
+  color: string;
 }
 
 export const getAll = (): Promise<AxiosResponse<User[]>> => {

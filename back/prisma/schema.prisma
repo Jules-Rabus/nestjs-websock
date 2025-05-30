@@ -22,6 +22,7 @@ model User {
   messages     Message[] @relation("UserMessages")
   chats        Chat[]    @relation("ChatParticipants")
   readMessages Message[] @relation("MessageReads")
+  color       String   @default("#aaaaaa")
 }
 
 model Chat {

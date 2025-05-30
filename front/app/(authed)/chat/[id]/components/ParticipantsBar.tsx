@@ -9,7 +9,11 @@ export default function ParticipantsBar({
   return (
     <div className="flex space-x-2 p-2 border-b">
       {participants.map((p) => (
-        <div key={p.id} className="px-2 py-1 bg-muted rounded-full text-sm">
+        <div
+          key={p.id}
+          className="px-2 py-1 rounded-full text-sm"
+          style={{ backgroundColor: p.color }}
+        >
           {p.firstName} {p.lastName}
         </div>
       ))}

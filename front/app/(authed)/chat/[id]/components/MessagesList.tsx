@@ -1,11 +1,12 @@
 import React from 'react';
 import MessageItem from '@/app/(authed)/chat/[id]/components/MessageItem';
 import { MessageWithEdit } from '@/app/(authed)/chat/[id]/page';
+import { User } from '@/app/actions/user';
 
 export default function MessagesList({
   messages,
-  currentUserId,
-  participantsCount,
+  currentUser,
+  participants,
   editText,
   setEditText,
   onStartEdit,
@@ -13,8 +14,8 @@ export default function MessagesList({
   onCancelEdit,
 }: {
   messages: MessageWithEdit[];
-  currentUserId: number;
-  participantsCount: number;
+  currentUser: User;
+  participants: User[];
   editText: string;
   setEditText: (s: string) => void;
   onStartEdit: (m: MessageWithEdit) => void;
@@ -27,8 +28,8 @@ export default function MessagesList({
         <MessageItem
           key={msg.id}
           msg={msg}
-          currentUserId={currentUserId}
-          participantsCount={participantsCount}
+          currentUser={currentUser}
+          participants={participants}
           onStartEdit={onStartEdit}
           onSaveEdit={onSaveEdit}
           onCancelEdit={onCancelEdit}

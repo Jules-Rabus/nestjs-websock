@@ -15,7 +15,13 @@ export class ChatService {
       },
       include: {
         participants: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            color: true,
+          },
         },
         _count: { select: { messages: true } },
       },
@@ -28,11 +34,16 @@ export class ChatService {
       where: { id },
       include: {
         participants: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            color: true,
+          },
         },
         messages: {
           include: {
-            author: { select: { id: true, firstName: true, lastName: true } },
             readBy: { select: { id: true, firstName: true, lastName: true } },
           },
           orderBy: { createdAt: 'asc' },
@@ -56,25 +67,19 @@ export class ChatService {
       },
       include: {
         participants: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            color: true,
+          },
         },
       },
     });
   }
 
-  async update(
-    id: number,
-    data: UpdateChatDto,
-  ): Promise<
-    Chat & {
-      participants: {
-        id: number;
-        email: string;
-        firstName: string;
-        lastName: string;
-      }[];
-    }
-  > {
+  async update(id: number, data: UpdateChatDto): Promise<Chat> {
     const updateData: Prisma.ChatUpdateInput = {};
     if (data.title !== undefined) {
       updateData.title = data.title;
@@ -89,7 +94,13 @@ export class ChatService {
       data: updateData,
       include: {
         participants: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            color: true,
+          },
         },
       },
     });

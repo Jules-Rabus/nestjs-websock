@@ -6,7 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put,
+  Patch,
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -43,7 +43,7 @@ export class UsersController {
     return this.usersService.createUser(body);
   }
 
-  @Put(':id')
+  @Patch(':id')
   updateUser(@Param('id') id: number, @Body() body: CreateOrUpdateUserDto) {
     return this.usersService.updateUser(id, body);
   }

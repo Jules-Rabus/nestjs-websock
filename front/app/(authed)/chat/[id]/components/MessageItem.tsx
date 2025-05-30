@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
+import { User } from '@/app/actions/user';
 import { MessageWithEdit } from '@/app/(authed)/chat/[id]/page';
 
 function formatTime(iso: string) {
@@ -15,8 +16,8 @@ function isEditable(createdAt: string) {
 
 export default function MessageItem({
   msg,
-  currentUserId,
-  participantsCount,
+  currentUser,
+  participants,
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
@@ -24,15 +25,17 @@ export default function MessageItem({
   setEditText,
 }: {
   msg: MessageWithEdit;
-  currentUserId: number;
-  participantsCount: number;
+  currentUser: User;
+  participants: User[];
   onStartEdit: (m: MessageWithEdit) => void;
   onSaveEdit: (m: MessageWithEdit) => void;
   onCancelEdit: (m: MessageWithEdit) => void;
   editText: string;
   setEditText: (s: string) => void;
 }) {
-  const isOwn = msg.author.id === currentUserId;
+  const isOwn = msg.authorId === currentUser.id;
+  const author = participants.find((p) => p.id === msg.authorId);
+
   const isImage = (path: string) => /\.(png|jpe?g|gif|webp|avif)$/.test(path);
   const readCount = msg.readBy.length;
 
@@ -57,21 +60,22 @@ export default function MessageItem({
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`relative rounded-lg p-3 max-w-xs ${
-          isOwn ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
-        }`}
+        className="relative rounded-lg p-3 max-w-xs"
+        style={{
+          backgroundColor: isOwn ? currentUser.color : author?.color,
+        }}
       >
         <div className="flex justify-between items-center mb-1 gap-1">
           <span className="text-xs">{formatTime(msg.createdAt)}</span>
-          {isOwn && canEdit && (
+          {isOwn && (
             <span className="text-[10px]">
-              {readCount} / {participantsCount - 1}
+              {readCount} / {participants.length - 1}
             </span>
           )}
         </div>
         {!isOwn && (
           <div className="text-sm font-semibold mb-1">
-            {msg.author.firstName} {msg.author.lastName}
+            {author?.firstName} {author?.lastName}
           </div>
         )}
         {msg.isEditing ? (

@@ -8,7 +8,7 @@ export interface Message {
   filePath: string | null;
   createdAt: string;
   updatedAt: string;
-  author: Partial<User>;
+  authorId: number;
   chatId: number;
   readBy: Partial<User>[];
 }

@@ -9,6 +9,7 @@
 
     * Création, modification du titre et suppression de conversations.
     * Suppression en cascade des messages lorsqu’une conversation est supprimée.
+    * Multiple conversation
 * **Messagerie en temps réel**
 
     * Streaming des messages via Server-Sent Events (SSE).
