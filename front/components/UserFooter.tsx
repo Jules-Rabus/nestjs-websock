@@ -19,13 +19,16 @@ export default function UserFooter() {
 
   const onSave = async () => {
     const socket = getSocket();
-    socket.emit('userChangeColor', { userId: user.id, color });
     const res = await api.patch(`users/${user.id}`, {
       firstName,
       lastName,
       color,
     });
     setUser(res.data);
+    socket.emit('userChange', {
+      userId: user.id,
+      user: { firstName, lastName, color },
+    });
     localStorage.setItem('user', JSON.stringify(res.data));
     setIsEditing(false);
   };

@@ -35,11 +35,11 @@ export default function ChatPage() {
     if (!user) return;
 
     const socket = getSocket();
-    socket.on('userChangeColor', ({ userId, color }) => {
+    socket.on('userChange', ({ userId, user }) => {
       setChat((prev) => {
         if (!prev) return null;
         const updatedParticipants = prev.participants.map((p) =>
-          p.id === userId ? { ...p, color } : p,
+          p.id === userId ? { ...p, ...user } : p,
         );
         return { ...prev, participants: updatedParticipants };
       });

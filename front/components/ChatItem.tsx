@@ -28,8 +28,6 @@ export default function ChatItem({
   onDelete: (id: number) => void;
   onChangeTitle: (s: string) => void;
 }) {
-  console.log('ChatItem rendered', online);
-
   return (
     <SidebarMenuItem>
       <div className="flex items-center justify-between w-full px-2 py-1 hover:bg-gray-100 rounded">
@@ -47,11 +45,6 @@ export default function ChatItem({
                 {chat.participants.map((p) => {
                   const abbr = `${p.firstName[0]}${p.lastName[0]}`;
                   const isOn = online.has(p.id);
-                  console.log(
-                    `Avatar for ${p.firstName} ${p.lastName}:`,
-                    abbr,
-                    isOn,
-                  );
                   return (
                     <Avatar
                       key={p.id}

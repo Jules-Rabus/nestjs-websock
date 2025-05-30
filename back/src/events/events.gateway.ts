@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { UseGuards } from '@nestjs/common';
 import { WsGuard } from '../auth/websocket-auth.guard';
+import { User } from '@prisma/client';
 
 @UseGuards(WsGuard)
 @WebSocketGateway({ cors: { origin: '*' } })
@@ -28,11 +29,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('userOffline', { userId });
   }
 
-  @SubscribeMessage('userChangeColor')
-  handleUserChangeColor(
-    @MessageBody() { userId, color }: { userId: number; color: string },
+  @SubscribeMessage('userChange')
+  handleUserChange(
+    @MessageBody() { userId, user }: { userId: number; user: User },
   ) {
-    this.server.emit('userChangeColor', { userId, color });
+    this.server.emit('userChange', { userId, user });
   }
 
   handleConnection(client: Socket) {
