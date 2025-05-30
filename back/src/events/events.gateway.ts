@@ -1,31 +1,51 @@
 import {
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-interface MessageReadPayload {
-  chatId: number;
-  messageId: number;
-  userId: number;
-}
-
 @WebSocketGateway({ cors: { origin: '*' } })
-export class EventsGateway {
-  @WebSocketServer()
-  server: Server;
+export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
+  private lastSeen = new Map<number, number>();
 
-  @SubscribeMessage('readMessage')
-  handleReadMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: MessageReadPayload,
-  ) {
-    this.server.to(`chat_${payload.chatId}`).emit('messageRead', {
-      messageId: payload.messageId,
-      userId: payload.userId,
-    });
+  @SubscribeMessage('userOnline')
+  handleUserOnline(@MessageBody() { userId }: { userId: number }) {
+    this.lastSeen.set(userId, Date.now());
+    this.server.emit('userOnline', { userId });
+  }
+
+  @SubscribeMessage('userOffline')
+  handleUserOffline(@MessageBody() { userId }: { userId: number }) {
+    this.lastSeen.delete(userId);
+    this.server.emit('userOffline', { userId });
+  }
+
+  handleConnection(client: Socket) {
+    const userId = Number(client.handshake.auth.userId);
+    this.lastSeen.set(userId, Date.now());
+    this.server.emit('userOnline', { userId });
+  }
+
+  handleDisconnect(client: Socket) {
+    const userId = Number(client.handshake.auth.userId);
+    this.lastSeen.delete(userId);
+    this.server.emit('userOffline', { userId });
+  }
+
+  constructor() {
+    setInterval(() => {
+      const now = Date.now();
+      for (const [userId, ts] of this.lastSeen.entries()) {
+        if (now - ts > 3 * 60 * 1000) {
+          this.lastSeen.delete(userId);
+          this.server.emit('userOffline', { userId });
+        }
+      }
+    }, 60 * 1000);
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -22,46 +22,53 @@ import {
   deleteChat,
 } from '@/app/actions/chat';
 import { Edit2, Trash2, Check, X } from 'lucide-react';
+import { socket } from '@/lib/api';
 
 export function AppSidebar() {
   const { user } = useContext(authContext);
   const [chats, setChats] = useState<ChatType[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [online, setOnline] = useState<Set<number>>(new Set());
   const router = useRouter();
 
   useEffect(() => {
-    load();
+    findAllChats().then((r) => setChats(r.data));
   }, []);
 
-  const load = () =>
-    findAllChats()
-      .then((res) => setChats(res.data))
-      .catch((err) => console.error(err));
+  useEffect(() => {
+    socket.on('userOnline', ({ userId }) => {
+      setOnline((o) => new Set(o).add(userId));
+    });
+    socket.on('userOffline', ({ userId }) => {
+      setOnline((o) => {
+        const n = new Set(o);
+        n.delete(userId);
+        return n;
+      });
+    });
+  }, [user]);
 
-  const startEdit = (chat: ChatType) => {
-    setEditingId(chat.id);
-    setEditingTitle(chat.title);
+  const load = () => findAllChats().then((r) => setChats(r.data));
+  const startEdit = (c: ChatType) => {
+    setEditingId(c.id);
+    setEditingTitle(c.title);
   };
-
   const saveEdit = async (id: number) => {
     await handleUpdateChat(id, { title: editingTitle });
     setEditingId(null);
     setEditingTitle('');
     load();
   };
-
   const cancelEdit = () => {
     setEditingId(null);
     setEditingTitle('');
   };
-
   const handleDelete = async (id: number) => {
     if (!confirm('Supprimer cette conversation ?')) return;
     await deleteChat(id);
     setChats((prev) => prev.filter((c) => c.id !== id));
   };
-
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -88,31 +95,34 @@ export function AppSidebar() {
                       className="font-medium flex-1"
                     >
                       {chat.title}
-                      <div>
-                        {editingId === chat.id && (
-                          <input
-                            className="w-full border rounded px-2 py-1"
-                            value={editingTitle}
-                            onChange={(e) => setEditingTitle(e.target.value)}
-                          />
-                        )}
-
-                        {editingId !== chat.id && (
-                          <div className="flex -space-x-1 mt-2">
-                            {chat.participants.map((p) => {
-                              const abbr = `${p.firstName[0]}${p.lastName[0]}`;
-                              return (
-                                <Avatar
-                                  key={p.id}
-                                  className="w-6 h-6 ring-2 ring-white"
+                      {editingId !== chat.id && (
+                        <div className="flex -space-x-1 mt-2">
+                          {chat.participants.map((p) => {
+                            const abbr = `${p.firstName[0]}${p.lastName[0]}`;
+                            const isOn = online.has(p.id);
+                            return (
+                              <Avatar
+                                key={p.id}
+                                className="w-6 h-6 ring-2 ring-white"
+                                title={`${p.firstName} ${p.lastName}`}
+                              >
+                                <AvatarFallback
+                                  className={`${isOn ? 'bg-green-500' : 'bg-gray-300'}`}
                                 >
-                                  <AvatarFallback>{abbr}</AvatarFallback>
-                                </Avatar>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
+                                  {abbr}
+                                </AvatarFallback>
+                              </Avatar>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {editingId === chat.id && (
+                        <input
+                          className="w-full border rounded px-2 py-1 mt-2"
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                        />
+                      )}
                     </Link>
                     <div className="flex items-center space-x-1">
                       {editingId === chat.id ? (
@@ -126,16 +136,10 @@ export function AppSidebar() {
                         </>
                       ) : (
                         <>
-                          <button
-                            className="cursor-pointer"
-                            onClick={() => startEdit(chat)}
-                          >
+                          <button onClick={() => startEdit(chat)}>
                             <Edit2 size={16} />
                           </button>
-                          <button
-                            className="cursor-pointer"
-                            onClick={() => handleDelete(chat.id)}
-                          >
+                          <button onClick={() => handleDelete(chat.id)}>
                             <Trash2 size={16} />
                           </button>
                         </>

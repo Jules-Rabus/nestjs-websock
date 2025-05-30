@@ -23,10 +23,12 @@
 * **Affichage des participants**
 
     * Affichage des avatars des participants dans la barre latérale et l’en-tête du chat.
+    * Affichage du statut en ligne des participants.
 
 ## Possibilité d'amélioration en lien avec le sujet
 * **Notifications** : Ajouter des notifications pour les nouveaux messages.
 * **Chat** : Afficher la suppression ou l'édition des messages en temps réel.
+* **Statut en ligne** : Indiquer qu'un user est en ligne depuis le back, c'est à dire quand son token est utlisé alors on le considère en ligne. Pas fait dans ce cas pour utiliser les websockets et non du SSE.
 
 ## Technologies utilisées
 
