@@ -37,6 +37,9 @@ export class ChatService {
       include: {
         participants: { select: { id: true, firstName: true, lastName: true } },
         messages: {
+          include: {
+            readBy: { select: { id: true, firstName: true, lastName: true } },
+          },
           orderBy: { createdAt: 'asc' },
         },
       },

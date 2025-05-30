@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useContext } from "react";
+import { useContext } from 'react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authContext } from "@/providers/AuthProvider";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signIn } from "../actions/auth";
-import { getUserInfo } from "../actions/user";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { authContext } from '@/providers/AuthProvider';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from '../actions/auth';
+import { getUserInfo } from '../actions/user';
 
 export default function Login() {
   const { setUser } = useContext(authContext);
@@ -28,17 +28,17 @@ export default function Login() {
     const formData = new FormData(e.target);
 
     const response = await signIn(
-      formData.get("email") as string,
-      formData.get("password") as string
+      formData.get('email') as string,
+      formData.get('password') as string,
     );
 
     if (response.status === 200) {
-      localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem('token', response.data.access_token);
 
       const user = await getUserInfo();
-      localStorage.setItem("user", JSON.stringify(user.data));
+      localStorage.setItem('user', JSON.stringify(user.data));
       setUser(user.data);
-      router.push("/chats");
+      router.push('/chat/create');
     }
   };
 
@@ -62,7 +62,7 @@ export default function Login() {
           </form>
         </CardContent>
         <CardFooter>
-          Pas de compte?{" "}
+          Pas de compte?{' '}
           <Link className="ml-1 text-blue-500 font-bold" href="/register">
             Inscrivez-vous!
           </Link>

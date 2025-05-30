@@ -1,5 +1,5 @@
-import { AxiosResponse } from "axios";
-import { api } from "../../lib/api";
+import { AxiosResponse } from 'axios';
+import { api } from '../../lib/api';
 
 interface SignInResponse {
   access_token: string;
@@ -14,16 +14,16 @@ type registerPayload = {
 
 export const signIn = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<AxiosResponse<SignInResponse>> => {
-  return api.post("auth/login", {
+  return api.post('auth/login', {
     email,
     password,
   });
 };
 
 export const register = async (
-  data: registerPayload
+  data: registerPayload,
 ): Promise<AxiosResponse<any>> => {
-  return api.post("auth/register", data);
+  return api.post('auth/register', data);
 };

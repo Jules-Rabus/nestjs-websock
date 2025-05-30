@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { AppSidebar } from "@/components/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { authContext } from "@/providers/AuthProvider";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { authContext } from '@/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useContext, useEffect } from 'react';
 
 export default function AuthedLayout({
   children,
@@ -16,7 +16,7 @@ export default function AuthedLayout({
 
   useEffect(() => {
     if (user === null) {
-      router.push("/login");
+      router.push('/login');
     }
   }, [user, router]);
 

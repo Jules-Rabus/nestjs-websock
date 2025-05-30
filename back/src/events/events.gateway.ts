@@ -2,20 +2,30 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
-})
+interface MessageReadPayload {
+  chatId: number;
+  messageId: number;
+  userId: number;
+}
+
+@WebSocketGateway({ cors: { origin: '*' } })
 export class EventsGateway {
   @WebSocketServer()
   server: Server;
 
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any) {
-    this.server.emit('message', payload);
+  @SubscribeMessage('readMessage')
+  handleReadMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: MessageReadPayload,
+  ) {
+    this.server.to(`chat_${payload.chatId}`).emit('messageRead', {
+      messageId: payload.messageId,
+      userId: payload.userId,
+    });
   }
 }

@@ -1,7 +1,6 @@
-import { AxiosResponse } from "axios";
-import { api } from "@/lib/api";
-import { User } from "./user";
-import { Chat } from "./chat";
+import { AxiosResponse } from 'axios';
+import { api } from '@/lib/api';
+import { User } from '@/app/actions/user';
 
 export interface Message {
   id: number;
@@ -9,8 +8,9 @@ export interface Message {
   filePath: string | null;
   createdAt: string;
   updatedAt: string;
-  author: User;
-  chat: Chat;
+  authorId: number;
+  chatId: number;
+  readBy: Partial<User>[];
 }
 
 export interface CreateMessage {
@@ -25,41 +25,45 @@ export interface UpdateMessage {
 }
 
 export const findAllMessages = async (): Promise<AxiosResponse<Message[]>> => {
-  return api.get("messages");
+  return api.get('messages');
 };
 
 export const findOneMessage = async (
-    id: number
+  id: number,
 ): Promise<AxiosResponse<Message>> => {
   return api.get(`messages/${id}`);
 };
 
 export const addMessage = async (
-    data: CreateMessage
+  data: CreateMessage,
 ): Promise<AxiosResponse<Message>> => {
   const formData = new FormData();
-  formData.append("content", data.content);
-  formData.append("chatId", data.chatId.toString());
+  formData.append('content', data.content);
+  formData.append('chatId', data.chatId.toString());
   if (data.file) {
-    formData.append("file", data.file);
+    formData.append('file', data.file);
   }
-  return api.post("messages", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  return api.post('messages', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 
+export const markRead = async (id: number): Promise<AxiosResponse<void>> => {
+  return api.post(`messages/${id}/read`);
+};
+
 export const handleUpdateMessage = async (
-    id: number,
-    data: UpdateMessage
+  id: number,
+  data: UpdateMessage,
 ): Promise<AxiosResponse<Message>> => {
   const formData = new FormData();
   if (data.content !== undefined) {
-    formData.append("content", data.content);
+    formData.append('content', data.content);
   }
   if (data.file) {
-    formData.append("file", data.file);
+    formData.append('file', data.file);
   }
   return api.patch(`messages/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };

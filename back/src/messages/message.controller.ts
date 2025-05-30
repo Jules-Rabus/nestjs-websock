@@ -63,6 +63,11 @@ export class MessageController {
     return this.messageService.update(+id, updateMessageDto, file);
   }
 
+  @Post(':id/read')
+  markRead(@GetUser() user: User, @Param('id') id: string) {
+    return this.messageService.markRead(+id, user.id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.messageService.remove(+id);
