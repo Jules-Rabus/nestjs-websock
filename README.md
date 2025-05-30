@@ -30,6 +30,7 @@
 * **Notifications** : Ajouter des notifications pour les nouveaux messages.
 * **Chat** : Afficher la suppression ou l'édition des messages en temps réel.
 * **Statut en ligne** : Indiquer qu'un user est en ligne depuis le back, c'est à dire quand son token est utlisé alors on le considère en ligne. Pas fait dans ce cas pour utiliser les websockets et non du SSE.
+* **Refactoriser le code pour avoir qu'un seul canal websocket, eviter de transmettre autant de fonction au enfant. **
 
 ## Technologies utilisées
 

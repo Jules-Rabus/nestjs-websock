@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { socket } from '@/lib/api';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getSocket } from '@/lib/api';
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +10,6 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
 } from '@/components/ui/sidebar';
-import { authContext } from '@/providers/AuthProvider';
 import {
   Chat as ChatType,
   findAllChats,
@@ -21,7 +20,6 @@ import ChatItem from '@/components/ChatItem';
 import UserFooter from '@/components/UserFooter';
 
 export function AppSidebar() {
-  const { user } = useContext(authContext);
   const [chats, setChats] = useState<ChatType[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -32,6 +30,7 @@ export function AppSidebar() {
   }, []);
 
   useEffect(() => {
+    const socket = getSocket();
     socket.on('userOnline', ({ userId }) =>
       setOnline((o) => new Set(o).add(userId)),
     );
@@ -51,10 +50,12 @@ export function AppSidebar() {
     () => findAllChats().then((r) => setChats(r.data)),
     [],
   );
+
   const startEdit = useCallback((c: ChatType) => {
     setEditingId(c.id);
     setEditingTitle(c.title);
   }, []);
+
   const saveEdit = useCallback(
     async (id: number) => {
       await handleUpdateChat(id, { title: editingTitle });
@@ -64,10 +65,12 @@ export function AppSidebar() {
     },
     [editingTitle, load],
   );
+
   const cancelEdit = useCallback(() => {
     setEditingId(null);
     setEditingTitle('');
   }, []);
+
   const handleDelete = useCallback(async (id: number) => {
     if (!confirm('Supprimer cette conversation ?')) return;
     await deleteChat(id);
@@ -99,7 +102,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      {user && <UserFooter userId={user.id} firstName={user.firstName} />}
+      <UserFooter />
     </Sidebar>
   );
 }

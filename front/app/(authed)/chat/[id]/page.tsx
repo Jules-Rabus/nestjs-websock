@@ -17,6 +17,7 @@ import ParticipantsBar from '@/app/(authed)/chat/[id]/components/ParticipantsBar
 import MessagesList from '@/app/(authed)/chat/[id]/components/MessagesList';
 import MessageInput from '@/app/(authed)/chat/[id]/components/MessageInput';
 import { authContext } from '@/providers/AuthProvider';
+import { getSocket } from '@/lib/api';
 
 export type MessageWithEdit = MessageType & { isEditing?: boolean };
 
@@ -32,6 +33,17 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!user) return;
+
+    const socket = getSocket();
+    socket.on('userChangeColor', ({ userId, color }) => {
+      setChat((prev) => {
+        if (!prev) return null;
+        const updatedParticipants = prev.participants.map((p) =>
+          p.id === userId ? { ...p, color } : p,
+        );
+        return { ...prev, participants: updatedParticipants };
+      });
+    });
 
     findOneChat(chatId).then((res) => {
       setChat(res.data);

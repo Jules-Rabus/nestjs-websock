@@ -9,11 +9,18 @@ export const getToken = () => {
   return localStorage.getItem('token') || null;
 };
 
-export const socket = io('http://localhost:3002');
+export const getSocket = () => {
+  const token = getToken();
+  return io('http://localhost:3002', {
+    auth: {
+      token: token,
+    },
+  });
+};
 
 api.interceptors.request.use(
   function (config) {
-    const token = localStorage.getItem('token');
+    const token = getToken();
 
     if (token) {
       config.headers.Authorization = 'Bearer ' + token;
@@ -22,9 +29,11 @@ api.interceptors.request.use(
       if (userJson) {
         try {
           const { id: userId } = JSON.parse(userJson);
+          if (!userId) return;
+          const socket = getSocket();
           socket.emit('userOnline', { userId });
-        } catch {
-          console.error('Error sending userOnline event: Invalid user data');
+        } catch (error) {
+          console.error('Error sending userOnline', error);
         }
       }
     }

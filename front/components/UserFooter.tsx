@@ -1,24 +1,25 @@
 'use client';
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { SidebarFooter } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Edit2, Check, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { authContext } from '@/providers/AuthProvider';
+import { getSocket } from '@/lib/api';
 
 export default function UserFooter() {
   const { user, setUser } = useContext(authContext);
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
-  const [firstName, setFirstName] = useState(user.firstName);
-  const [lastName, setLastName] = useState(user.lastName);
-  const [color, setColor] = useState(
-    localStorage.getItem('userColor') || '#3b82f6',
-  );
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [color, setColor] = useState('');
 
   const onSave = async () => {
+    const socket = getSocket();
+    socket.emit('userChangeColor', { userId: user.id, color });
     const res = await api.patch(`users/${user.id}`, {
       firstName,
       lastName,
@@ -29,12 +30,22 @@ export default function UserFooter() {
     setIsEditing(false);
   };
 
+  const onOpenEdit = () => {
+    setFirstName(user.firstName || '');
+    setLastName(user.lastName || '');
+    setColor(user.color || '#aaaaaa');
+    setIsEditing(true);
+  };
+
   const onLogout = () => {
     localStorage.clear();
     router.push('/login');
   };
 
-  const abbr = `${firstName[0] || ''}${lastName[0] || ''}`;
+  const abbr = useMemo(() => {
+    if (!user) return;
+    return `${user.firstName[0]}${user.lastName[0]}`;
+  }, [user]);
 
   return (
     <SidebarFooter className="flex flex-col items-center justify-between p-4">
@@ -63,16 +74,16 @@ export default function UserFooter() {
             <button onClick={onSave}>
               <Check size={16} />
             </button>
-            <button onClick={() => setIsEditing(false)}>
+            <button onClick={onOpenEdit}>
               <X size={16} />
             </button>
           </>
         ) : (
           <>
             <span className="text-sm">
-              {user.firstName} {user.lastName}
+              {user?.firstName} {user?.lastName}
             </span>
-            <button onClick={() => setIsEditing(true)}>
+            <button onClick={onOpenEdit}>
               <Edit2 size={16} />
             </button>
           </>

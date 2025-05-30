@@ -1,3 +1,5 @@
+'use client';
+
 import { Chat as ChatType } from '@/app/actions/chat';
 import { SidebarMenuItem } from '@/components/ui/sidebar';
 import Link from 'next/link';
@@ -26,6 +28,8 @@ export default function ChatItem({
   onDelete: (id: number) => void;
   onChangeTitle: (s: string) => void;
 }) {
+  console.log('ChatItem rendered', online);
+
   return (
     <SidebarMenuItem>
       <div className="flex items-center justify-between w-full px-2 py-1 hover:bg-gray-100 rounded">
@@ -43,13 +47,22 @@ export default function ChatItem({
                 {chat.participants.map((p) => {
                   const abbr = `${p.firstName[0]}${p.lastName[0]}`;
                   const isOn = online.has(p.id);
+                  console.log(
+                    `Avatar for ${p.firstName} ${p.lastName}:`,
+                    abbr,
+                    isOn,
+                  );
                   return (
                     <Avatar
                       key={p.id}
-                      className={`w-6 h-6 ring-2 ring-white ${isOn ? 'bg-green-500' : 'bg-gray-300'}`}
+                      className="w-6 h-6 ring-2 ring-white"
                       title={`${p.firstName} ${p.lastName}`}
                     >
-                      <AvatarFallback>{abbr}</AvatarFallback>
+                      <AvatarFallback
+                        className={`${isOn ? 'bg-green-500' : 'bg-gray-300'}`}
+                      >
+                        {abbr}
+                      </AvatarFallback>
                     </Avatar>
                   );
                 })}
