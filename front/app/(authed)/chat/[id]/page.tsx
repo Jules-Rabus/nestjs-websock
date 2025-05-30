@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'next/navigation';
 import {
   findOneChat,
@@ -16,6 +16,7 @@ import {
 import ParticipantsBar from '@/app/(authed)/chat/[id]/components/ParticipantsBar';
 import MessagesList from '@/app/(authed)/chat/[id]/components/MessagesList';
 import MessageInput from '@/app/(authed)/chat/[id]/components/MessageInput';
+import { authContext } from '@/providers/AuthProvider';
 
 export type MessageWithEdit = MessageType & { isEditing?: boolean };
 
@@ -27,7 +28,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [editText, setEditText] = useState('');
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const { user } = useContext(authContext);
 
   useEffect(() => {
     findOneChat(chatId).then((res) => {
@@ -40,8 +41,8 @@ export default function ChatPage() {
 
       initialMessages.forEach((message) => {
         if (
-          message.authorId !== currentUser.id &&
-          !message.readBy.some((u) => u.id === currentUser.id)
+          message.authorId !== user.id &&
+          !message.readBy.some((u) => u.id === user.id)
         ) {
           markRead(message.id);
         }
@@ -59,8 +60,8 @@ export default function ChatPage() {
           return prev.map((m) => (m.id === msg.id ? { ...m, ...msg } : m));
         } else {
           if (
-            msg.authorId !== currentUser.id &&
-            !msg.readBy.some((u) => u.id === currentUser.id)
+            msg.authorId !== user.id &&
+            !msg.readBy.some((u) => u.id === user.id)
           ) {
             markRead(msg.id);
           }
@@ -115,7 +116,8 @@ export default function ChatPage() {
       <ParticipantsBar participants={chat.participants} />
       <MessagesList
         messages={messages}
-        currentUserId={currentUser.id}
+        currentUserId={user.id}
+        participantsCount={chat.participants.length}
         editText={editText}
         setEditText={setEditText}
         onStartEdit={startEdit}

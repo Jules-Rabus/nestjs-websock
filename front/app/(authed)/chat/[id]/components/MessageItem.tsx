@@ -16,6 +16,7 @@ function isEditable(createdAt: string) {
 export default function MessageItem({
   msg,
   currentUserId,
+  participantsCount,
   onStartEdit,
   onSaveEdit,
   onCancelEdit,
@@ -24,6 +25,7 @@ export default function MessageItem({
 }: {
   msg: MessageWithEdit;
   currentUserId: number;
+  participantsCount: number;
   onStartEdit: (m: MessageWithEdit) => void;
   onSaveEdit: (m: MessageWithEdit) => void;
   onCancelEdit: (m: MessageWithEdit) => void;
@@ -32,6 +34,7 @@ export default function MessageItem({
 }) {
   const isOwn = msg.authorId === currentUserId;
   const isImage = (path: string) => /\.(png|jpe?g|gif|webp|avif)$/.test(path);
+  const readCount = msg.readBy.length;
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -42,8 +45,11 @@ export default function MessageItem({
       >
         <div className="flex justify-between items-center mb-1">
           <span className="text-xs">{formatTime(msg.createdAt)}</span>
-          {msg.readBy.length > 0 && (
-            <span className="text-[10px]">{msg.readBy.length} /</span>
+          {msg.readBy.length > 0 && isOwn && (
+            <span className="text-[10px]">
+              {' '}
+              {readCount} / {participantsCount - 1}
+            </span>
           )}
         </div>
         {msg.isEditing ? (

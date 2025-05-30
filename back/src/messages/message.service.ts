@@ -62,6 +62,7 @@ export class MessageService {
       include: {
         author: { select: { id: true, email: true } },
         chat: { select: { id: true, title: true } },
+        readBy: { select: { id: true, firstName: true, lastName: true } },
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -78,6 +79,7 @@ export class MessageService {
       include: {
         author: { select: { id: true, email: true } },
         chat: { select: { id: true, title: true } },
+        readBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });
     if (!msg) {
@@ -112,6 +114,7 @@ export class MessageService {
       },
       include: {
         author: { select: { id: true, email: true } },
+        readBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });
     this.messageSubject.next(created);
@@ -141,7 +144,15 @@ export class MessageService {
       updateData.filePath = key;
     }
 
-    return this.prisma.message.update({ where: { id }, data: updateData });
+    const updated = await this.prisma.message.update({
+      where: { id },
+      data: updateData,
+      include: {
+        readBy: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+    this.messageSubject.next(updated);
+    return updated;
   }
 
   async remove(id: number): Promise<Message> {

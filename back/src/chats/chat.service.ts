@@ -10,7 +10,12 @@ export class ChatService {
 
   async findAll(user: User): Promise<
     (Chat & {
-      participants: { id: number; email: string }[];
+      participants: {
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+      }[];
       _count: { messages: number };
     })[]
   > {
@@ -19,7 +24,9 @@ export class ChatService {
         participants: { some: { id: user.id } },
       },
       include: {
-        participants: { select: { id: true, email: true } },
+        participants: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
         _count: { select: { messages: true } },
       },
       orderBy: { updatedAt: 'desc' },
@@ -28,14 +35,21 @@ export class ChatService {
 
   async findOne(id: number): Promise<
     Chat & {
-      participants: { id: number; firstName: string; lastName: string }[];
+      participants: {
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+      }[];
       messages: { id: number; content: string; createdAt: Date }[];
     }
   > {
     const chat = await this.prisma.chat.findUnique({
       where: { id },
       include: {
-        participants: { select: { id: true, firstName: true, lastName: true } },
+        participants: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
         messages: {
           include: {
             readBy: { select: { id: true, firstName: true, lastName: true } },
@@ -50,9 +64,16 @@ export class ChatService {
     return chat;
   }
 
-  async create(
-    data: CreateChatDto,
-  ): Promise<Chat & { participants: { id: number; email: string }[] }> {
+  async create(data: CreateChatDto): Promise<
+    Chat & {
+      participants: {
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+      }[];
+    }
+  > {
     const { title, participants } = data;
     return this.prisma.chat.create({
       data: {
@@ -62,7 +83,9 @@ export class ChatService {
         },
       },
       include: {
-        participants: { select: { id: true, email: true } },
+        participants: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
       },
     });
   }
@@ -70,7 +93,16 @@ export class ChatService {
   async update(
     id: number,
     data: UpdateChatDto,
-  ): Promise<Chat & { participants: { id: number; email: string }[] }> {
+  ): Promise<
+    Chat & {
+      participants: {
+        id: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+      }[];
+    }
+  > {
     const updateData: Prisma.ChatUpdateInput = {};
     if (data.title !== undefined) {
       updateData.title = data.title;
@@ -84,7 +116,9 @@ export class ChatService {
       where: { id },
       data: updateData,
       include: {
-        participants: { select: { id: true, email: true } },
+        participants: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
       },
     });
   }

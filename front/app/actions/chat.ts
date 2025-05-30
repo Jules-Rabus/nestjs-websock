@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { api, getToken } from '@/lib/api';
 import { User } from './user';
-import { Message } from 'postcss';
+import { Message } from './message';
 
 export interface Chat {
   id: number;
@@ -41,6 +41,10 @@ export const handleUpdateChat = async (
   data: UpdateChat,
 ): Promise<AxiosResponse<Chat>> => {
   return api.patch(`chats/${id}`, data);
+};
+
+export const deleteChat = async (id: number): Promise<AxiosResponse<void>> => {
+  return api.delete(`chats/${id}`);
 };
 
 export const getEventSourceChat = (chatId: number): EventSource => {

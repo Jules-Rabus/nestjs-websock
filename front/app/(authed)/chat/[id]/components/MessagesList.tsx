@@ -5,6 +5,7 @@ import { MessageWithEdit } from '@/app/(authed)/chat/[id]/page';
 export default function MessagesList({
   messages,
   currentUserId,
+  participantsCount,
   editText,
   setEditText,
   onStartEdit,
@@ -13,6 +14,7 @@ export default function MessagesList({
 }: {
   messages: MessageWithEdit[];
   currentUserId: number;
+  participantsCount: number;
   editText: string;
   setEditText: (s: string) => void;
   onStartEdit: (m: MessageWithEdit) => void;
@@ -26,6 +28,7 @@ export default function MessagesList({
           key={msg.id}
           msg={msg}
           currentUserId={currentUserId}
+          participantsCount={participantsCount}
           onStartEdit={onStartEdit}
           onSaveEdit={onSaveEdit}
           onCancelEdit={onCancelEdit}
