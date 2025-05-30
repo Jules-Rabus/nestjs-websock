@@ -8,17 +8,7 @@ import { UpdateChatDto } from './dto/update-chat-dto';
 export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(user: User): Promise<
-    (Chat & {
-      participants: {
-        id: number;
-        email: string;
-        firstName: string;
-        lastName: string;
-      }[];
-      _count: { messages: number };
-    })[]
-  > {
+  async findAll(user: User): Promise<Chat[]> {
     return this.prisma.chat.findMany({
       where: {
         participants: { some: { id: user.id } },
@@ -33,17 +23,7 @@ export class ChatService {
     });
   }
 
-  async findOne(id: number): Promise<
-    Chat & {
-      participants: {
-        id: number;
-        email: string;
-        firstName: string;
-        lastName: string;
-      }[];
-      messages: { id: number; content: string; createdAt: Date }[];
-    }
-  > {
+  async findOne(id: number): Promise<Chat> {
     const chat = await this.prisma.chat.findUnique({
       where: { id },
       include: {
@@ -52,6 +32,7 @@ export class ChatService {
         },
         messages: {
           include: {
+            author: { select: { id: true, firstName: true, lastName: true } },
             readBy: { select: { id: true, firstName: true, lastName: true } },
           },
           orderBy: { createdAt: 'asc' },
@@ -64,16 +45,7 @@ export class ChatService {
     return chat;
   }
 
-  async create(data: CreateChatDto): Promise<
-    Chat & {
-      participants: {
-        id: number;
-        email: string;
-        firstName: string;
-        lastName: string;
-      }[];
-    }
-  > {
+  async create(data: CreateChatDto): Promise<Chat> {
     const { title, participants } = data;
     return this.prisma.chat.create({
       data: {

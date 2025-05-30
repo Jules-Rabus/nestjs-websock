@@ -92,7 +92,7 @@ export class MessageService {
     data: CreateMessageDto,
     file: Express.Multer.File | undefined,
     userId: number,
-  ): Promise<Message & { author: { id: number; email: string } }> {
+  ): Promise<Message> {
     let key: string | null = null;
     if (file) {
       key = `${Date.now()}_${file.originalname}`;
@@ -113,7 +113,9 @@ export class MessageService {
         filePath: key,
       },
       include: {
-        author: { select: { id: true, email: true } },
+        author: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
         readBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });
@@ -148,6 +150,7 @@ export class MessageService {
       where: { id },
       data: updateData,
       include: {
+        author: { select: { id: true, firstName: true, lastName: true } },
         readBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });

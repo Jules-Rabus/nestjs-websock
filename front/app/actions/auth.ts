@@ -12,6 +12,15 @@ type registerPayload = {
   lastName: string;
 };
 
+type registerData = {
+  id: number;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  roles: string;
+};
+
 export const signIn = async (
   email: string,
   password: string,
@@ -24,6 +33,6 @@ export const signIn = async (
 
 export const register = async (
   data: registerPayload,
-): Promise<AxiosResponse<any>> => {
+): Promise<AxiosResponse<registerData>> => {
   return api.post('auth/register', data);
 };

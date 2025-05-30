@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   findOneChat,
@@ -41,14 +41,14 @@ export default function ChatPage() {
 
       initialMessages.forEach((message) => {
         if (
-          message.authorId !== user.id &&
+          message.author.id !== user.id &&
           !message.readBy.some((u) => u.id === user.id)
         ) {
           markRead(message.id);
         }
       });
     });
-  }, [chatId]);
+  }, [user, chatId]);
 
   useEffect(() => {
     const es = getEventSourceChat(chatId);
@@ -60,7 +60,7 @@ export default function ChatPage() {
           return prev.map((m) => (m.id === msg.id ? { ...m, ...msg } : m));
         } else {
           if (
-            msg.authorId !== user.id &&
+            msg.author.id !== user.id &&
             !msg.readBy.some((u) => u.id === user.id)
           ) {
             markRead(msg.id);
@@ -70,7 +70,7 @@ export default function ChatPage() {
       });
     };
     return () => es.close();
-  }, [chatId]);
+  }, [user, chatId]);
 
   const handleSend = () => {
     if ((!input.trim() && !file) || !chat) return;
@@ -83,31 +83,32 @@ export default function ChatPage() {
     setFile(e.target.files?.[0] || null);
   };
 
-  const startEdit = (msg: MessageWithEdit) => {
+  const startEdit = useCallback((msg: MessageWithEdit) => {
     setMessages((prev) =>
       prev.map((m) => (m.id === msg.id ? { ...m, isEditing: true } : m)),
     );
     setEditText(msg.content);
-  };
+  }, []);
 
-  const saveEdit = async (msg: MessageWithEdit) => {
-    const res = await handleUpdateMessage(msg.id, {
-      content: editText,
-    });
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.id === msg.id ? { ...res.data, isEditing: false } : m,
-      ),
-    );
-    setEditText('');
-  };
+  const saveEdit = useCallback(
+    async (msg: MessageWithEdit) => {
+      const res = await handleUpdateMessage(msg.id, { content: editText });
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msg.id ? { ...res.data, isEditing: false } : m,
+        ),
+      );
+      setEditText('');
+    },
+    [editText],
+  );
 
-  const cancelEdit = (msg: MessageWithEdit) => {
+  const cancelEdit = useCallback((msg: MessageWithEdit) => {
     setMessages((prev) =>
       prev.map((m) => (m.id === msg.id ? { ...m, isEditing: false } : m)),
     );
     setEditText('');
-  };
+  }, []);
 
   if (!chat) return <div className="p-4">Loading…</div>;
 

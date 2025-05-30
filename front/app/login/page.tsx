@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,10 +22,10 @@ export default function Login() {
   const { setUser } = useContext(authContext);
   const router = useRouter();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.target as HTMLFormElement);
 
     const response = await signIn(
       formData.get('email') as string,

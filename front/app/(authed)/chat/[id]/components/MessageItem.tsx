@@ -32,9 +32,27 @@ export default function MessageItem({
   editText: string;
   setEditText: (s: string) => void;
 }) {
-  const isOwn = msg.authorId === currentUserId;
+  const isOwn = msg.author.id === currentUserId;
   const isImage = (path: string) => /\.(png|jpe?g|gif|webp|avif)$/.test(path);
   const readCount = msg.readBy.length;
+
+  const [canEdit, setCanEdit] = React.useState(
+    isOwn && isEditable(msg.createdAt),
+  );
+
+  React.useEffect(() => {
+    if (!isOwn) return;
+    const createdTs = new Date(msg.createdAt).getTime();
+    const expireTs = createdTs + 5 * 60 * 1000;
+    const now = Date.now();
+    const delay = expireTs - now;
+    if (delay <= 0) {
+      setCanEdit(false);
+      return;
+    }
+    const timer = setTimeout(() => setCanEdit(false), delay);
+    return () => clearTimeout(timer);
+  }, [isOwn, msg.createdAt]);
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -43,15 +61,19 @@ export default function MessageItem({
           isOwn ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
         }`}
       >
-        <div className="flex justify-between items-center mb-1">
+        <div className="flex justify-between items-center mb-1 gap-1">
           <span className="text-xs">{formatTime(msg.createdAt)}</span>
-          {msg.readBy.length > 0 && isOwn && (
+          {isOwn && canEdit && (
             <span className="text-[10px]">
-              {' '}
               {readCount} / {participantsCount - 1}
             </span>
           )}
         </div>
+        {!isOwn && (
+          <div className="text-sm font-semibold mb-1">
+            {msg.author.firstName} {msg.author.lastName}
+          </div>
+        )}
         {msg.isEditing ? (
           <>
             <input
@@ -95,7 +117,7 @@ export default function MessageItem({
                 Télécharger
               </a>
             )}
-            {isOwn && isEditable(msg.createdAt) && (
+            {isOwn && canEdit && (
               <button
                 onClick={() => onStartEdit(msg)}
                 className="absolute top-1 right-1 text-[10px] opacity-50 hover:opacity-100"

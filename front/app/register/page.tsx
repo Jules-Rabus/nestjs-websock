@@ -46,9 +46,14 @@ export default function Register() {
   });
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
-    register(values).then((response) => {
-      router.push('/login');
-    });
+    register(values)
+      .then(() => {
+        router.push('/login');
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'inscription:", error);
+        alert("Une erreur est survenue lors de l'inscription.");
+      });
   }
 
   return (
