@@ -26,8 +26,6 @@ export default function ChatPage() {
   const chatId = Number(id);
   const [chat, setChat] = useState<ChatType | null>(null);
   const [messages, setMessages] = useState<MessageWithEdit[]>([]);
-  const [input, setInput] = useState('');
-  const [file, setFile] = useState<File | null>(null);
   const [editText, setEditText] = useState('');
   const { user } = useContext(authContext);
 
@@ -86,17 +84,6 @@ export default function ChatPage() {
     return () => es.close();
   }, [user, chatId]);
 
-  const handleSend = () => {
-    if ((!input.trim() && !file) || !chat) return;
-    addMessage({ content: input, chatId, file: file || undefined });
-    setInput('');
-    setFile(null);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null);
-  };
-
   const startEdit = useCallback((msg: MessageWithEdit) => {
     setMessages((prev) =>
       prev.map((m) => (m.id === msg.id ? { ...m, isEditing: true } : m)),
@@ -140,11 +127,7 @@ export default function ChatPage() {
         onCancelEdit={cancelEdit}
       />
       <MessageInput
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onSend={handleSend}
-        file={file}
-        onFileChange={handleFileChange}
+        chatId={chat.id}
       />
     </div>
   );

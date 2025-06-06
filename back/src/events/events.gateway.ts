@@ -16,6 +16,17 @@ import { User } from '@prisma/client';
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private lastSeen = new Map<number, number>();
+  private lastTyping = new Map<number, { chatId: number; ts: number }>();
+
+  @SubscribeMessage('userTyping')
+  handleUserTyping(
+    @MessageBody() { chatId, userId }: { chatId: number; userId: number },
+  ) {
+    this.lastSeen.set(userId, Date.now());
+    this.server.emit('userTyping', { chatId, userId });
+    this.lastTyping.set(userId, { chatId, ts: Date.now() });
+    this.server.emit('userTyping', { chatId, userId });
+  }
 
   @SubscribeMessage('userOnline')
   handleUserOnline(@MessageBody() { userId }: { userId: number }) {
@@ -48,6 +59,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('userOffline', { userId });
   }
 
+  // On pourrait également déplacer cette logique côté client
   constructor() {
     setInterval(() => {
       const now = Date.now();
@@ -58,5 +70,15 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
     }, 60 * 1000);
+
+    setInterval(() => {
+      const now = Date.now();
+      for (const [userId, info] of this.lastTyping.entries()) {
+        if (now - info.ts > 5000) {
+          this.lastTyping.delete(userId);
+          this.server.emit('stopTyping', { chatId: info.chatId, userId });
+        }
+      }
+    }, 1000);
   }
 }
