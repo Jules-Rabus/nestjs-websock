@@ -28,6 +28,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('userTyping', { chatId, userId });
   }
 
+  @SubscribeMessage('stopTyping')
+  handleStopTyping(
+    @MessageBody() { chatId, userId }: { chatId: number; userId: number },
+  ) {
+    this.lastTyping.delete(userId);
+    this.server.emit('stopTyping', { chatId, userId });
+  }
+
   @SubscribeMessage('userOnline')
   handleUserOnline(@MessageBody() { userId }: { userId: number }) {
     this.lastSeen.set(userId, Date.now());

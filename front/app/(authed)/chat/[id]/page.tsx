@@ -8,7 +8,6 @@ import {
   getEventSourceChat,
 } from '@/app/actions/chat';
 import {
-  addMessage,
   Message as MessageType,
   handleUpdateMessage,
   markRead,
@@ -128,6 +127,8 @@ export default function ChatPage() {
       />
       <MessageInput
         chatId={chat.id}
+        userId={user.id}
+        participants={chat.participants}
       />
     </div>
   );
